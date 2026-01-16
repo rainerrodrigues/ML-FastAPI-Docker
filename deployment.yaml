@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ml-fastapi-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ml-fastapi
+  template:
+    metadata:
+      labels:
+        app: ml-fastapi
+    spec:
+      containers:
+      - name: ml-fastapi
+        image: ml-fastapi:1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
