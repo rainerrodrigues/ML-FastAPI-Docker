@@ -1,34 +1,19 @@
-import pandas as pd
-import yaml
+from feast import FeatureStore
 import mlflow
-import mlflow.sklearn
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+import pandas as pd
 
-params = yaml.safe_load(open("params.yaml"))
+store = FeatureStore(repo_path="features")
 
-df = pd.read_csv("data/processed/train.csv")
-X = df.drop("target", axis=1)
-y = df["target"]
+training_df = store.get_historical_features(
+    entity_df=pd.DataFrame({"entity_id": [1, 2, 3]}),
+    features=[
+        "iris_features:sepal_length",
+        "iris_features:sepal_width",
+        "iris_features:petal_length",
+        "iris_features:petal_width",
+    ],
+).to_df()
 
-mlflow.set_experiment("reproducible-iris")
-
-with mlflow.start_run():
-    model = RandomForestClassifier(
-        n_estimators=params["train"]["n_estimators"],
-        max_depth=params["train"]["max_depth"],
-        random_state=42
-    )
-
-    model.fit(X, y)
-    preds = model.predict(X)
-
-    acc = accuracy_score(y, preds)
-
-    mlflow.log_params(params["train"])
-    mlflow.log_metric("accuracy", acc)
-
-    mlflow.sklearn.log_model(model, "model")
-
-    print("Accuracy:", acc)
+X = training_df.drop(columns=["entity_id", "event_timestamp"])
+# y comes from label source (simplified here)
 

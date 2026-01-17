@@ -1,33 +1,26 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import joblib
-import numpy as np
-import os
+from feast import FeatureStore
 
-app = FastAPI(title="Sklearn Interence API")
+store = FeatureStore(repo_path="features")
 
-MODEL_VERSION = os.getenv("MODEL_VERSION","v1")
-
-model = joblib.load("app/model.joblib")
-
-class IrisRequest(BaseModel):
-	features: list[float] # sepal_length, sepal_width, petal_length, petal_width
-	
-@app.get("/health/live")
-def liveness():
-        return {"status": "alive"}
-        
-@app.get("/health/ready")
-def readiness():
-        return {
-            "status": "ready",
-            "model_version": MODEL_VERSION
-	
 @app.post("/predict")
-def predict(request: IrisRequest):
-	X = np.array(request.features).reshape(1,-1)
-	prediction = model.predict(X)[0]
-	return {
-	    "prediction": int(prediction),
-	    "model_version": MODEL_VERSIOM
-	    }
+def predict(entity_id: int):
+    features = store.get_online_features(
+        features=[
+            "iris_features:sepal_length",
+            "iris_features:sepal_width",
+            "iris_features:petal_length",
+            "iris_features:petal_width",
+        ],
+        entity_rows=[{"entity_id": entity_id}],
+    ).to_dict()
+
+    X = [[
+        features["sepal_length"][0],
+        features["sepal_width"][0],
+        features["petal_length"][0],
+        features["petal_width"][0],
+    ]]
+
+    pred = model.predict(X)[0]
+    return {"prediction": int(pred)}
+
