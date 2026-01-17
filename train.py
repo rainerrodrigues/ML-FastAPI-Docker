@@ -5,7 +5,7 @@ import joblib
 X, y = load_iris(return_X_y=True)
 
 
-model = RandomForestClassifier(n_estimators=100)
+model = RandomForestClassifier(n_estimators=100, max_depths=5)
 model.fit(X,y)
 
 joblib.dump(model,"app/model.joblib")

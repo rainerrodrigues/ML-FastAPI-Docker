@@ -3,7 +3,12 @@ kind: Deployment
 metadata:
   name: ml-fastapi-deployment
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: ml-fastapi
@@ -18,3 +23,18 @@ spec:
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8000
+        env:
+        - name: MODEL_VERSION
+          value: "v2"
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8000
+          initialDelaySeconds: 10
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8000
+          initialDelaySeconds: 5
+          periodSeconds: 5
