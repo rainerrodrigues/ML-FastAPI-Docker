@@ -1,4 +1,5 @@
 from feast import FeatureStore
+from rag.pipeline import rag_pipeline
 
 store = FeatureStore(repo_path="features")
 
@@ -23,4 +24,10 @@ def predict(entity_id: int):
 
     pred = model.predict(X)[0]
     return {"prediction": int(pred)}
+
+
+
+@app.post("/rag")
+def rag_endpoint(query: str):
+    return {"answer": rag_pipeline(query)}
 

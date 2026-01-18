@@ -1,0 +1,5 @@
+FastAPI is a high-performance Python web framework.
+Docker is used to containerize applications.
+Kubernetes orchestrates containerized workloads.
+RAG combines retrieval with language generation.
+

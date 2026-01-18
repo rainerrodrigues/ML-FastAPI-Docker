@@ -1,0 +1,12 @@
+# monitoring/make_current.py
+import pandas as pd
+import numpy as np
+
+df = pd.read_csv("monitoring/reference.csv")
+
+# simulate drift
+df["sepal_length"] += np.random.normal(0.5, 0.2, len(df))
+df["petal_width"] *= 1.2
+
+df.to_csv("monitoring/current.csv", index=False)
+
